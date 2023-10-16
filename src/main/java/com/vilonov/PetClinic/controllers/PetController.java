@@ -5,11 +5,15 @@ import com.vilonov.PetClinic.controllers.utils.BaseResponse;
 import com.vilonov.PetClinic.models.Client;
 import com.vilonov.PetClinic.models.Pet;
 import com.vilonov.PetClinic.services.PetService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
@@ -20,8 +24,9 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 public class PetController extends BaseController {
     private final PetService petService;
 
-    {
-        petService = new PetService();
+    @Autowired
+    public PetController(PetService petService) {
+        this.petService = petService;
     }
 
     @GetMapping(value = "{name}", produces = APPLICATION_JSON_VALUE)
@@ -35,26 +40,32 @@ public class PetController extends BaseController {
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public BaseResponse post(@RequestBody Pet pet) {
-        return petService.addPet(pet)?
-                new BaseResponse(SUCCESS_STATUS, CODE_SUCCESS):new BaseResponse(ERROR_STATUS, AUTH_FAILURE);
+    public HttpStatus post(@RequestBody Pet pet) {
+        return petService.addPet(pet)?HttpStatus.OK :HttpStatus.BAD_REQUEST;
+
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Pet>> getAll() {
-        return (ResponseEntity<List<Pet>>) petService.getAllPet();
+        try {
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("log.txt"));
+            List<Pet> pt = petService.getAllPet();
+            bufferedWriter.write(pt.toString());
+            bufferedWriter.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return ResponseEntity.ok(petService.getAllPet());
     }
 
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public BaseResponse updatePet(@RequestBody Pet pet) {
-        return petService.updatePet(pet)?
-                new BaseResponse(SUCCESS_STATUS, CODE_SUCCESS):new BaseResponse(ERROR_STATUS, AUTH_FAILURE);
+    public HttpStatus updatePet(@RequestBody Pet pet) {
+        return petService.updatePet(pet)?HttpStatus.OK :HttpStatus.BAD_REQUEST;
     }
 
     @DeleteMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public BaseResponse deletePet(@RequestBody Pet pet) {
-        return petService.deletePet(pet)?
-                new BaseResponse(SUCCESS_STATUS, CODE_SUCCESS):new BaseResponse(ERROR_STATUS, AUTH_FAILURE);
+    public HttpStatus deletePet(@RequestBody Pet pet) {
+        return petService.deletePet(pet)?HttpStatus.OK :HttpStatus.BAD_REQUEST;
     }
 }
 

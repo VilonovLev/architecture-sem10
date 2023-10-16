@@ -4,6 +4,7 @@ import com.vilonov.PetClinic.controllers.utils.BaseController;
 import com.vilonov.PetClinic.controllers.utils.BaseResponse;
 import com.vilonov.PetClinic.models.Consultation;
 import com.vilonov.PetClinic.services.ConsultationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +16,9 @@ import java.util.List;
 public class ConsultationController extends BaseController {
     private final ConsultationService consultationService;
 
-    {
-        consultationService = new ConsultationService();
+    @Autowired
+    public ConsultationController(ConsultationService consultationService) {
+        this.consultationService = consultationService;
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
